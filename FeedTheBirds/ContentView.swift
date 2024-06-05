@@ -39,17 +39,14 @@ struct ContentView: View {
     }
 
     func feedBaby() {
-        smallBirdHungry = false
-//
         startHungryTimer()
         withAnimation {
             isRotated = true
         } completion: {
             hasWorm = false
             isRotated = false
+            smallBirdHungry = false
         }
-
-
     }
 
     func startHungryTimer() {
@@ -82,11 +79,22 @@ struct ContentView: View {
 
                     Text(smallBirdHungry ? "I'm\nhungry!" : "           \n        ")
                         .font(.system(size: 14))
-                    Image(systemName: "bird.fill")
-                        .resizable()
-                        .frame(width: 50, height: 50)
                         .foregroundColor(.brown)
-                        .scaleEffect(x: -1, y: 1)
+                        .multilineTextAlignment(.center)
+                    if (smallBirdHungry) {
+                        Image("hungryBird")
+                            .resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: 50, height: 50)
+
+                            .rotationEffect(.degrees(30))
+                    } else {
+                        Image(systemName: "bird.fill")
+                            .resizable()
+                            .frame(width: 50, height: 50)
+                            .foregroundColor(.brown)
+                            .scaleEffect(x: -1, y: 1)
+                    }
                 }
             }
             Button("Get a worm!") {
@@ -107,3 +115,5 @@ struct ContentView: View {
 #Preview {
     ContentView()
 }
+
+
