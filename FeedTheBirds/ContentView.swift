@@ -11,47 +11,54 @@ struct ContentView: View {
     @State private var hasWorm = false
     @State private var findingWorm = false
     @State private var smallBirdHungry = false
+    @State private var birdOffset = CGSize.zero // Track bird's offset
 
     @State var hungryTimer: Timer?
-    @State  var findingWormTimer: Timer?
+    @State var findingWormTimer: Timer?
 
-    func goFindWorm () {
+    func goFindWorm() {
         findingWorm = true
+        
+        withAnimation(.linear(duration: 0.5)) { // Animate offset change
+            birdOffset = CGSize(width: -400, height: 0) // Move bird offscreen
+        }
         if let existingTimer = findingWormTimer {
             existingTimer.invalidate() // Invalidate existing timer
         }
+
         findingWormTimer = Timer.scheduledTimer(withTimeInterval: 1, repeats: false, block: { _ in
             findingWorm = false
             hasWorm = true
-            findingWormTimer = nil // Release timer reference after firing
+            withAnimation(.linear(duration: 0.5)) { // Animate offset change
+                birdOffset = CGSize(width: 0, height: 0) // Move bird offscreen
+            }
         })
     }
 
-    func feedBaby () {
+    func feedBaby() {
         smallBirdHungry = false
         hasWorm = false
+        startHungryTimer()
     }
 
-    func startHungryTimer () {
+    func startHungryTimer() {
         hungryTimer = Timer.scheduledTimer(withTimeInterval: 3, repeats: false, block: { _ in
             smallBirdHungry = true
             hungryTimer = nil // Release timer reference after firing
         })
     }
 
-
     var body: some View {
         VStack {
             HStack(alignment: .bottom) {
-                if (hasWorm) {
+                if hasWorm {
                     Text("I have a worm!")
                 }
-                if !findingWorm {
-                    Image(systemName: "bird.fill")
-                        .resizable()
-                        .frame(width: 100, height: 100)
-                        .foregroundColor(hasWorm ? .green : .orange)
-                }
+                Image(systemName: "bird.fill")
+                    .resizable()
+                    .frame(width: 100, height: 100)
+                    .foregroundColor(hasWorm ? .green : .orange)
+                    .offset(birdOffset) // Apply offset for animation
                 Image(systemName: smallBirdHungry ? "bird" : "bird.fill")
                     .resizable()
                     .frame(width: 50, height: 50)
@@ -65,16 +72,17 @@ struct ContentView: View {
             Button("Get a worm!") {
                 goFindWorm()
             }
+            .disabled(hasWorm)
             Button("Feed the baby bird!") {
                 feedBaby()
-                startHungryTimer()
             }
             .disabled(!hasWorm)
-            .onAppear { // Call startHungryTimer on view appearance
-                  startHungryTimer()
-                }
+        }
+        .onAppear {
+            startHungryTimer()
         }
     }
+
 }
 #Preview {
     ContentView()
